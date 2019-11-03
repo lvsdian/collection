@@ -13,6 +13,7 @@
    <div align="center"> <img src="img/LinkedList继承关系.jpg"/> </div><br>
 
 
+
 ### 数据结构
 
 `LinkedList`底层是一个双链表，是一个直线型的链表结构。
