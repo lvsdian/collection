@@ -510,3 +510,5 @@
     }
 ```
 
+![](img/hashmap.jpg)
+
