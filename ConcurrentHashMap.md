@@ -1,27 +1,46 @@
-### 概述
+* [弱一致性](#%E5%BC%B1%E4%B8%80%E8%87%B4%E6%80%A7)
+* [1\.7](#17)
+* [1\.8](#18)
+* [源码分析](#%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90)
+  * [内部类](#%E5%86%85%E9%83%A8%E7%B1%BB)
+  * [属性](#%E5%B1%9E%E6%80%A7)
+  * [构造方法](#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95)
+  * [核心方法](#%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95)
 
 ### 弱一致性
 
+- 即`put()`一个元素后，`get()`在某段时间内可能还看不到。
 
+- `ConcurrentHashMap`的弱一致性主要是为了提升效率，是一致性与效率之间的一种权衡。要成为强一致性，就得到处使用锁，甚至是全局锁，这就与`Hashtable`和同步的`HashMap`一样了。
+- 原因：`get()`是一个无锁操作，因此它和`put`可以同时进行。
 
 ### 1.7
 
-- `ConcurrentHashMap` 采用了分段锁技术，其中` Segment `继承于 `ReentrantLock`。不会像 `HashTable` 那样不管是 put 还是 get 操作都需要做同步处理，理论上 `ConcurrentHashMap` 支持` CurrencyLevel` (`Segment` 数组数量)的线程并发。每当一个线程占用锁访问一个 `Segment `时，不会影响到其他的` Segment`。
+- `ConcurrentHashMap` 采用了分段锁技术，其中` Segment `继承于 `ReentrantLock`。不会像 `HashTable` 那样不管是`put`还是`get`操作都需要做同步处理，理论上 `ConcurrentHashMap` 支持` CurrencyLevel` (`Segment` 数组数量)的线程并发。每当一个线程占用锁访问一个 `Segment `时，不会影响到其他的` Segment`。
+- 结构还是数组 + 链表。
+- 它先定位到`Segment`，然后再进行`put`操作。步骤：
+  1. 通过`scanAndLockForPut`自旋获取锁。
+  2. 如果重试次数达到了`MAX_SCAN_RETRIES`就改为阻塞锁获取，保证能获取成功。
+  3. 根据`key`定位到`HashEntry`，如果`HashEntry`为空就新建一个`HashEntry`加入到`Segment`中，如果不为空就判断`key`是否相等，相等就覆盖，不相等就添加。
+- `get()`将 `Key`通过 `Hash `之后定位到具体的 `Segment `，再通过一次 `Hash `定位到具体的元素上。由于 `HashEntry`中的 `value` 属性是用 `volatile` 关键词修饰的，保证了内存可见性，所以每次获取时都是最新值。
+- 1.7 已经解决了并发问题，并且能支持 `N` 个 `Segment `这么多次数的并发，但依然存在 `HashMap `在 1.7 版本中的问题。那就是数据结构为数组加链表，查询遍历链表效率太低。
 
-- 1.7 已经解决了并发问题，并且能支持 N 个 `Segment `这么多次数的并发，但依然存在 `HashMap `在 1.7 版本中的问题。那就是数据结构为数组加链表，查询遍历链表效率太低。
+### 1.8 
 
-#### 1.8 
+1. 抛弃了原有的 `Segment` 分段锁，而采用了 `CAS + synchronized` 来保证并发安全性。底层使用数组+链表+红黑树来实现。
+  
+2. `put()`步骤
 
-1. 抛弃了原有的 Segment 分段锁，而采用了 `CAS + synchronized` 来保证并发安全性。
-   底层使用数组+链表+红黑树来实现
+   1. 根据`key`计算`hash`值
+   2. 判断是否要初始化`Node<K,V>[] table`
+   3. 如果`key`定位到的`Node`为空，表示当前位置可以写入数据，利用`cas`尝试写入。
+   4. 如果`key`定位到的`Node`的`hashcode == MOVED == -1`,则需要进行扩容。
+   5. 如果都不满足，则利用 `synchronized `锁写入数据。
+   6. 写入数据后如果数量大于 `TREEIFY_THRESHOLD` 则要转换为红黑树。
 
-2. 继承关系
+3. 继承关系
 
-   <div align="center"> <img src="img/ConcurrentHasmMap继承关系图.jpg"/> </div><br>
-
-
-
-
+   ![](img/ConcurrentHasmMap继承关系图.jpg)
 
 ### 源码分析
 
