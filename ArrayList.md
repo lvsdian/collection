@@ -16,13 +16,13 @@
 
 5. 继承结构图：
 
-   <div align="center"> <img src="img/ArrayList继承关系.jpg"/> </div><br>
+   ![](img/ArrayList继承关系.jpg)
 
 
 
 ### 数据结构
 
-​	底层数据结构就是数组，元素类型为`Object`类型，可以存放所有类型数据。
+- 底层数据结构就是数组，元素类型为`Object`类型，可以存放所有类型数据。
 
 ### 源码分析
 
