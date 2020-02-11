@@ -7,42 +7,33 @@
 
 1. 底层实现为链表结构，推荐使用`foreach`顺序访问，`foreach`是`iterator`的语法糖而不是for的语法糖。
 2. `LinkedList`将做为双链表来实现，它本身实现了`List`接口和`Deque`接口，实现了所有可选的列表操作，并且允许包含所有元素（包括null）。
-  3. `LinkedList`内部实现了6种主要的辅助方法：**`void linkFirst(E e)`、`void linkLast(E e)`、`linkBefore(E e, Node<E> succ)`、`E unlinkFist(Node<E> f)`、`E unlinkLast(Node<E> l)`           `E unlink(Node<E> x)`。**
-  4. 继承结构图
+3. `LinkedList`内部实现了6种主要的辅助方法：**`void linkFirst(E e)`、`void linkLast(E e)`、`linkBefore(E e, Node<E> succ)`、`E unlinkFist(Node<E> f)`、`E unlinkLast(Node<E> l)`           `E unlink(Node<E> x)`。**
+4. 继承结构图
 
-   <div align="center"> <img src="img/LinkedList继承关系.jpg"/> </div><br>
+   ![](img/LinkedList继承关系.jpg)
 
 
 
 ### 数据结构
 
-`LinkedList`底层是一个双链表，是一个直线型的链表结构。
-
-
+- `LinkedList`底层是一个双链表，是一个直线型的链表结构。
 
 ### 源码分析
 
-
-
 #### 继承关系
-
-
 
 1. 继承`AbstractSequentialList`：在遍历`LinkedList`的时候，官方更推荐使用顺序访问，也就是使用我们的迭代器。官方源码对遍历进行了优化：通过判断索引index更靠近链表的头部还是尾部来选择遍历的方向
 
 2. 实现`list`接口
 
-3. 实现了`Cloneable`接口，它支持克隆（浅克隆），底层实现：`LinkedList`节点并没有被克隆，只是通过Object的`clone()`方法得到的`Object`对象强制转化为了`LinkedList`,然后把它内部的实例域都置空，再把被拷贝的`LinkedList`节点中的每一个值都拷贝到`clone`中。（后面有源码解析）
+3. 实现了`Cloneable`接口，它支持克隆（浅克隆），底层实现：`LinkedList`节点并没有被克隆，只是通过`Object`的`clone()`方法得到的`Object`对象强制转化为了`LinkedList`,然后把它内部的实例域都置空，再把被拷贝的`LinkedList`节点中的每一个值都拷贝到`clone`中。（后面有源码解析）
 
 4. 实现了`Deque`接口，即能将`LinkedList`当作双端队列使用。
 
 5. 实现`java.io.Serializable`接口，这意味着`LinkedList`支持序列化，能通过序列化去传输。
 
-   
 
 #### 内部类
-
-
 
 真正用来存储元素的数据结构
 
