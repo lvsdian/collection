@@ -15,17 +15,31 @@
 ### 与HashMap区别
 
 - `hashMap`线程不安全，`hashTable`线程安全，但是通过加`synchronized`，所以效率不高。
-
 - `hashMap`键值都可以为`null`，`hashTable`键值不能为`null`。
 
   - `hashTable`的`put()`方法在`key`为`null`时直接抛`NullPointerException`。
   - `hashTable`使用的安全失败机制，因此每次读到的数据不一定是最新的。如果使用`null`就无法判断是`key`为`null`还是`key`不存在。`ConcurrentHashMap`同理。
-
 - `hashTable`初始容量为`11`，`hashMap`初始容量为`16`。负载因子默认都是`0.75`。
-
 - `hashTable`扩容后长度为`原来长度翻倍 +  1`，`hashMap`扩容后长度为`原来长度翻倍 `
-
 - `HashMap`中的`Iterator`迭代器是`fail-fast`的，而`HastTable`的`Enumerator`不是`fail-fast`的。
 
-  
+### LinkedHashMap/TreeMap
 
+- TreeMap按键有序
+- LinkedHashMap如果构造参数为false，就按插入有序，参数为true就是lru，即访问顺序。
+
+
+
+- Collection
+  - Set：无序，不重复
+    - HashSet：HashMap实现，value是固定的new Object( )
+      - LinkedHashSet：链表保证有序、哈希表保证元素唯一
+    - TreeSet：TreeMap实现，可以指定Comparator进行排序；可以根据元素的自然顺序排序
+  - List：有序，可重复
+    - ArrayList：数组
+    - LinkedList：双向链表
+- Map：键值对
+  - HashMap
+    - LinkedHashMap：默认插入有序，accessOrder为true表示访问有序
+  - TreeMap：基于红黑树实现，可以指定Comparator进行排序，默认按键的自然顺序排序
+  - HashTable

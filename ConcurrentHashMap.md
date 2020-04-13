@@ -20,7 +20,7 @@
 - 结构还是数组 + 链表。
 - 它先定位到`Segment`，然后再进行`put`操作。步骤：
   1. 通过`scanAndLockForPut`自旋获取锁。
-  2. 如果重试次数达到了`MAX_SCAN_RETRIES`就改为阻塞锁获取，保证能获取成功。
+  2. 如果重试次数达到了`MAX_SCAN_RETRIES`就改为阻塞获取锁，保证能获取成功。
   3. 根据`key`定位到`HashEntry`，如果`HashEntry`为空就新建一个`HashEntry`加入到`Segment`中，如果不为空就判断`key`是否相等，相等就覆盖，不相等就添加。
 - `get()`将 `Key`通过 `Hash `之后定位到具体的 `Segment `，再通过一次 `Hash `定位到具体的元素上。由于 `HashEntry`中的 `value` 属性是用 `volatile` 关键词修饰的，保证了内存可见性，所以每次获取时都是最新值。
 - 1.7 已经解决了并发问题，并且能支持 `N` 个 `Segment `这么多次数的并发，但依然存在 `HashMap `在 1.7 版本中的问题。那就是数据结构为数组加链表，查询遍历链表效率太低。
@@ -38,7 +38,13 @@
    5. 如果都不满足，则利用 `synchronized `锁写入数据。
    6. 写入数据后如果数量大于 `TREEIFY_THRESHOLD` 则要转换为红黑树。
 
-3. 继承关系
+3. 为什么不用ReentrantLock，而用synchronized
+
+   - 减少内存开销:如果使用ReentrantLock则需要节点继承AQS来获得同步支持，增加内存开销，而1.8中只有头节点需要进行同步。
+
+   - 内部优化:synchronized则是JVM直接支持的，JVM能够在运行时作出相应的优化措施：锁粗化、锁消除、锁自旋等等。
+
+4. 继承关系
 
    ![](img/ConcurrentHasmMap继承关系图.jpg)
 
