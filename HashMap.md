@@ -121,7 +121,8 @@
     static final int UNTREEIFY_THRESHOLD = 6;
 
     /**
-     * 当Map里面的数量超过这个值时，表中的桶才能进行树形化 ，否则桶内元素太多时会扩容，而不是树形化 为了避免进行扩容、树形化选择的冲突，这个值不能小于 4 * TREEIFY_THRESHOLD
+     * 当Map里面的数量超过这个值时，表中的桶才能进行树形化 ，否则桶内元素太多时会扩容，而不是树形化 为了避免
+     * 进行扩容、树形化选择的冲突，这个值不能小于 4 * TREEIFY_THRESHOLD
      */
     static final int MIN_TREEIFY_CAPACITY = 64;
 
@@ -169,13 +170,13 @@
         public final int hashCode() {
             return Objects.hashCode(key) ^ Objects.hashCode(value);
         }
-		//返回旧节点值
+	//返回旧节点值
         public final V setValue(V newValue) {
             V oldValue = value;
             value = newValue;
             return oldValue;
         }
-		//如果是同一对象，一定相等
+	//如果是同一对象，一定相等
         //如果不是同一对象，再比较每一对key和value
         public final boolean equals(Object o) {
             if (o == this)
@@ -238,7 +239,8 @@
      *
      * 在使用位运算之前减1是必要的，否则对于cap=16,最后就会得到32.实际需求应当返回16.
      * 
-     * int范围在-2^31~2^31-1，因此对于int最大的2次幂数为2^30，这也就是MAXIMUM_CAPACITY的值。c超过      * 这个值就会返回MAXIMUM_CAPACITY。而这边代码中一共右移了1+2+4+8+16=31位，因此可以保证高位1以下      * 的低位都会变成1.
+     * int范围在-2^31~2^31-1，因此对于int最大的2次幂数为2^30，这也就是MAXIMUM_CAPACITY的值。
+     * c超过这个值就会返回MAXIMUM_CAPACITY。而这边代码中一共右移了1+2+4+8+16=31位，因此可以保证高位1以下的低位都会变成1.
      * 
      * 如果传入的n为负数，经过补码运算后为-1，在return中，如果n<0，会返回1，所有不会有异常
      */
@@ -278,7 +280,7 @@
         if (s > 0) {
             //如果当前map的table没有初始化
             if (table == null) { 
-                //传入map的实际长度s <= threshold = 0.75*capacity，所以ft <= capacity,ft最大会				 //=capacity
+                //传入map的实际长度s <= threshold = 0.75*capacity，所以ft <= capacity,ft最大会=capacity
                 //所以ft就是传入map的capacity
                 float ft = ((float)s / loadFactor) + 1.0F;
                 //比较capacity与可分配的最大长度
@@ -300,15 +302,17 @@
     }
 
     /**
-     * hashCode值：是KV对中的K对象的hashCode方法的返回值(若没有重写则默认用Object类的hashCode方法	  * 的生成值)
+     * hashCode值：是KV对中的K对象的hashCode方法的返回值(若没有重写则默认用Object类的hashCode方法的生成值)
      * hash值：是在hashCode值的基础上又进行了一步运算后的结果，这个运算过程就是hash方法。
      * 数组下标：根据该hash值和数组长度计算出数组下标，计算公式：hash值  &（数组长度-1）= 下标。
      *
-     * 如果key为空，那么hash值置为0。HashMap允许null作为键，虽然这样，因为null的hash值一定是0，而且		 * null==null为真，所以HashMap里面最多只会有一个null键。而且这个null键一定是放在数组的第一个位置	   * 上。但是如果存在hash碰撞，该位置上形成链表了，那么null键对应的节点就不确定在链表中的哪个位置了	 * （取决于插入顺序，并且每次扩容其在链表中的位置都可能会改变）。
+     * 如果key为空，那么hash值置为0。HashMap允许null作为键，虽然这样，因为null的hash值一定是0，而且null==null为真，
+     * 所以HashMap里面最多只会有一个null键。而且这个null键一定是放在数组的第一个位置上。但是如果存在hash碰撞，该位置上形成链表了，
+     * 那么null键对应的节点就不确定在链表中的哪个位置了（取决于插入顺序，并且每次扩容其在链表中的位置都可能会改变）。
      * 
-	 * 当h在【0-65535】范围内，h ^ (h >>> 16)==h (因为此时 h >>> 16 全为0)
-	 * 当h在【65535-N】范围内，位运算后的结果和h不同
-	 * 当h在【-N-0】范围内，位运算后的结果和h也不尽相同
+     * 当h在【0-65535】范围内，h ^ (h >>> 16)==h (因为此时 h >>> 16 全为0)
+     * 当h在【65535-N】范围内，位运算后的结果和h不同
+     * 当h在【-N-0】范围内，位运算后的结果和h也不尽相同
      */
     static final int hash(Object key) {
         int h;
@@ -317,12 +321,19 @@
     /**
      * 插入key-value,如果已经存在重复的key-value，就返回原来的value,如果不存在重复的，就返回null
      *
-     * 大概思路：根据key求hash值，根据hash值计算在数组中的位置，如果没有发生hash冲突，把key-value构建	   * 成节点放在哈希桶中即可；如果发生了hash冲突，分三种情况，1.如果与数组元素的key相同，替换value值，	 * 2.与红黑树节点冲突，添加到红黑树节点中。3.与数组元素的key不同，也不是红黑树节点，遍历链表，如果没		* 有重复，放到链表末尾，判断是否超过阈值，如果超过要转为红黑树。增加一个节点后，还需要判断是否需要扩		 * 容。如果有重复，就替换value值。返回原来的value值，没有重复就返回空。
+     * 大概思路：根据key求hash值，根据hash值计算在数组中的位置，
+     * 	如果没有发生hash冲突，把key-value构建成节点放在哈希桶中即可；
+     * 	如果发生了hash冲突，分三种情况，
+     *		1.如果与数组元素的key相同，替换value值，	 
+     * 		2.与红黑树节点冲突，添加到红黑树节点中。
+     * 		3.与数组元素的key不同，也不是红黑树节点，遍历链表，如果没有重复，放到链表末尾，判断是否超过阈值，如果超过要转为红黑树。
+     * 		  增加一个节点后，还需要判断是否需要扩容。如果有重复，就替换value值。返回原来的value值，没有重复就返回空。
      */
     final V putVal(int hash, K key, V value, boolean onlyIfAbsent,boolean evict) {
         //hash数组(hash桶)
         Node<K,V>[] tab; 
-        //hash桶中的任一节点,同时也是链表或红黑树的首节点。(可以想象一下数组竖着放，每个数组元素横向都可		//以组成一个链表或者红黑树，数组中的每个元素都是链表或者红黑树的的首节点)
+        //hash桶中的任一节点,同时也是链表或红黑树的首节点。(可以想象一下数组竖着放，每个数组元素横向都可		
+	//以组成一个链表或者红黑树，数组中的每个元素都是链表或者红黑树的的首节点)
         Node<K,V> p; 
         //n：hash数组长度，i：根据hash及数组长度n计算出来的下标，公式：(n-1)&hash= 下标
         int n, i;
@@ -345,7 +356,8 @@
                 e = p;
             //第二种：如果p节点是红黑树节点，就把新节点插入到红黑树中，
             else if (p instanceof TreeNode)
-                //如果插入的节点已存在，就返回该节点(不为null)，用e接收，即如果有重复节点，e为重复节					//点，如果没有重复节点，e为null。该值用来判断put，操作是否成功,如果成功，返回null。
+                //如果插入的节点已存在，就返回该节点(不为null)，用e接收，即如果有重复节点，e为重复节					
+		//点，如果没有重复节点，e为null。该值用来判断put，操作是否成功,如果成功，返回null。
                 e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
             //第三种：不等于首节点，也不是红黑树节点，则为链表节点
             else {
@@ -399,7 +411,7 @@
         int newCap, newThr = 0;
         //case一：如果原数组长度>0，即原数组中已经有值
         if (oldCap > 0) {
-			//特殊情况，已经超过最大容量，不再扩容，直接返回
+	    //特殊情况，已经超过最大容量，不再扩容，直接返回
             if (oldCap >= MAXIMUM_CAPACITY) {
                 threshold = Integer.MAX_VALUE;
                 return oldTab;
@@ -431,8 +443,7 @@
         threshold = newThr;
         //从以上操作我们知道, 初始化HashMap时, 
     	//如果构造函数没有指定initialCapacity, 则table大小为16
-    	//如果构造函数指定了initialCapacity, 则table大小为threshold, 即大于指定initialCapacity的		 //最小的2的整数次幂
- 
+    	//如果构造函数指定了initialCapacity, 则table大小为threshold, 即大于initialCapacity的最小的2的次幂
         //从下面开始, 初始化table或者扩容, 实际上都是通过新建一个table来完成的        
         @SuppressWarnings({"rawtypes","unchecked"})
             Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];
@@ -444,7 +455,7 @@
                 Node<K,V> e;
                 //如果原数组的j位置有元素
                 if ((e = oldTab[j]) != null) {
-                    //这里注意, table中存放的只是Node的引用, 这里将oldTab[j]=null只是清除旧表的引					 //用, 但是真正的node节点还在, 只是现在由e指向它
+                    //这里注意, table中存放的只是Node的引用, 这里将oldTab[j]=null只是清除旧表的引					 		     //用, 但是真正的node节点还在, 只是现在由e指向它
                     oldTab[j] = null;
                     //如果j位置元素没有后续元素，即不是链表，不是红黑树，就单单一个节点
                     if (e.next == null)
@@ -462,9 +473,9 @@
                         Node<K,V> next;
                         //遍历节点：
                         //	do {
-    					//		next = e.next;
-   						//		 ...
-						//	} while ((e = next) != null);
+    			//		next = e.next;
+   			//		 ...
+			//	} while ((e = next) != null);
                         //按顺序遍历该存储桶位置上的链表中的节点
                         do {
                             next = e.next;
@@ -485,8 +496,8 @@
                                 hiTail = e;
                             }
                         } while ((e = next) != null);
-                        //所以上面这段：我们首先准备了两个链表 lo 和 hi, 然后我们顺序遍历该存储桶上							//的链表的每个节点, 如果 (e.hash & oldCap) == 0, 我们就将节点放入lo链表, 						 //否则, 放入hi链表.
-                        
+                        //所以上面这段：我们首先准备了两个链表 lo 和 hi, 然后我们顺序遍历该存储桶上的链表的每个节点, 
+			//如果 (e.hash & oldCap) == 0, 我们就将节点放入lo链表, 否则, 放入hi链表.
                         //如果lo链表非空, 我们就把整个lo链表放到新table的j位置上				
                         if (loTail != null) {
                             loTail.next = null;
@@ -497,28 +508,29 @@
                             hiTail.next = null;
                             newTab[j + oldCap] = hiHead;
                         }
-                        //综上, 这段代码的意义就是将原来的链表拆分成两个链表, 并将这两个链表分别放到						 //新的table的 j 位置和 j+oldCap 上, j位置就是原链表在原table中的位置, 拆						//分的标准就是：(e.hash & oldCap) == 0
+                        //综上, 这段代码的意义就是将原来的链表拆分成两个链表, 并将这两个链表分别放到新的table的 j 位置和 j+oldCap 上, 
+			//j位置就是原链表在原table中的位置, 拆分的标准就是：(e.hash & oldCap) == 0
                         
                         //首先明确三点:
-						//	1.oldCap一定是2的整数次幂, 这里假设是2^m
-						//	2.newCap是oldCap的两倍, 则会是2^(m+1)
-						//	3.hash对数组大小取模(n - 1) & hash 其实就是取hash的低m位
+			//1.oldCap一定是2的整数次幂, 这里假设是2^m
+			//2.newCap是oldCap的两倍, 则会是2^(m+1)
+			//3.hash对数组大小取模(n - 1) & hash 其实就是取hash的低m位
                         //例如:
-                        //	我们假设 oldCap = 16, 即 2^4,
-						// 	16 - 1=15,二进制表示为 0000 0000 0000 0000 0000 0000 0000 1111
-						//	可见除了低4位, 其他位置都是0,则 (16-1) & hash 自然就是取hash值的低4						  //  位,我们假设它为 abcd.
+                        //我们假设 oldCap = 16, 即 2^4,
+			// 	16 - 1=15,二进制表示为 0000 0000 0000 0000 0000 0000 0000 1111
+			//	可见除了低4位, 其他位置都是0,则 (16-1) & hash 自然就是取hash值的低4位,我们假设它为 abcd.
                         
-                        //	以此类推, 当我们将oldCap扩大两倍后, 新的index的位置就变成了 (32-1) & 						   //  hash, 其实就是取 hash值的低5位. 那么对于同一个Node, 低5位的值无外乎两						//  种情况:0abcd,1abcd
-                        //	其中, 0abcd与原来的index值一致,而1abcd =0abcd +10000=0abcd+oldCap
-                    	//  故虽然数组大小扩大了一倍，但是同一个key在新旧table中对应的index却存在一						  //  定联系： 要么一致，要么相差一个 oldCap。
-                        
-                        //	而新旧index是否一致就体现在hash值的第4位(我们把最低为称作第0位), 怎么拿						   //  到这一位的值呢, 只要:
+                        //以此类推, 当我们将oldCap扩大两倍后, 新的index的位置就变成了 (32-1) & hash, 其实就是取 hash值的低5位. 
+			//那么对于同一个Node, 低5位的值无外乎两种情况:0abcd,1abcd
+                        //其中, 0abcd与原来的index值一致,而1abcd =0abcd +10000=0abcd+oldCap
+                    	//故虽然数组大小扩大了一倍，但是同一个key在新旧table中对应的index却存在一定联系： 要么一致，要么相差一个 oldCap。
+                        //而新旧index是否一致就体现在hash值的第4位(我们把最低为称作第0位), 怎么拿到这一位的值呢, 只要:
                         //	hash & 0000 0000 0000 0000 0000 0000 0001 0000
-                        //  上式就等效于  hash & oldCap
-                        //	故得出结论:
+                        //上式就等效于  hash & oldCap
+                        //故得出结论:
                         // 如果 (e.hash & oldCap) == 0 则该节点在新表的下标位置与旧表一致都为 j
-						// 如果 (e.hash & oldCap) == 1 则该节点在新表的下标位置 j + oldCap
-                        // 根据这个条件, 我们将原位置的链表拆分成两个链表, 然后一次性将整个链表放到新						  // 的Table对应的位置上.
+			// 如果 (e.hash & oldCap) == 1 则该节点在新表的下标位置 j + oldCap
+                        // 根据这个条件, 我们将原位置的链表拆分成两个链表, 然后一次性将整个链表放到新的Table对应的位置上.
                     }
                 }
             }
